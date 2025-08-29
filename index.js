@@ -3,7 +3,7 @@ const express = require('express')
 const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 5000
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 // Middle ware
 app.use(cors());
@@ -27,9 +27,38 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
 
+        // DB Collections
+        const tipsCollection = client.db("GreenNest").collection("all-tips");
 
+        // Api for tips
+        app.get('/tips', async (req, res) => {
+            
+            const result = await tipsCollection.find().toArray();
+            res.send(result);
+        })
+        app.get('/tips/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = {_id: new ObjectId(id)}
+            const result = await tipsCollection.findOne(filter)
+            res.send(result)
+        })
+        app.post('/tips', async (req, res) => {
+            const newTips = req.body;
+            const result = await tipsCollection.insertOne(newTips);
+            res.send(result);
+        })
+        app.patch('/tips/:id', async ( req, res) => {
+            const id = req.params.id;
+            const {email} = req.body;
+            const filter = {_id: new ObjectId(id)}
+            const updateDoc = {
+                $inc: {totalLikes: 1},
+                $addToSet: {likedBy: email }
+            }
+            const result = await tipsCollection.updateOne(filter, updateDoc)
+            res.send(result)
+        })
 
-        
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
