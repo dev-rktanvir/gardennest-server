@@ -32,8 +32,14 @@ async function run() {
 
         // Api for tips
         app.get('/tips', async (req, res) => {
-            
-            const result = await tipsCollection.find().toArray();
+            const email = req.query.email;
+            const query = {};
+
+            if(email){
+                query.userEmail = email
+            }
+
+            const result = await tipsCollection.find(query).toArray();
             res.send(result);
         })
         app.get('/tips/:id', async (req, res) => {
@@ -45,7 +51,17 @@ async function run() {
         app.post('/tips', async (req, res) => {
             const newTips = req.body;
             const result = await tipsCollection.insertOne(newTips);
-            res.send(result);
+            res.send(result)
+        })
+        app.put('/tips/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedTips = req.body;
+            const filter = {_id: new ObjectId(id)}
+            const updateDoc = {
+                $set: updatedTips
+            }
+            const result = await tipsCollection.updateOne(filter, updateDoc)
+            res.send(result)
         })
         app.patch('/tips/:id', async ( req, res) => {
             const id = req.params.id;
