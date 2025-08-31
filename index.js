@@ -29,6 +29,8 @@ async function run() {
 
         // DB Collections
         const tipsCollection = client.db("GreenNest").collection("all-tips");
+        const gardenersCollection = client.db("GreenNest").collection("gardeners");
+        const slidersCollection = client.db("GreenNest").collection("slider-data");
 
         // Api for tips
         app.get('/tips', async (req, res) => {
@@ -79,6 +81,23 @@ async function run() {
             const filter = {_id: new ObjectId(id)}
             const result = await tipsCollection.deleteOne(filter)
             res.send(result)
+        })
+
+        // Api for Gardeners
+        app.post('/gardeners', async (req, res) => {
+            const newUser = req.body;
+            const result = await gardenersCollection.insertOne(newUser);
+            res.send(result)
+        })
+        app.get('/gardeners', async (req, res) => {
+            const result = await gardenersCollection.find().toArray();
+            res.send(result)
+        })
+
+        // Api for slider
+        app.get('/slider', async ( req, res) => {
+            const result = await slidersCollection.find().toArray();
+            res.send(result);
         })
 
         // Send a ping to confirm a successful connection
