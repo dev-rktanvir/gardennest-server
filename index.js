@@ -35,18 +35,25 @@ async function run() {
         // Api for tips
         app.get('/tips', async (req, res) => {
             const email = req.query.email;
+            const limit = parseInt(req.query.limit);
+
             const query = {};
 
-            if(email){
+            if (email) {
                 query.userEmail = email
             }
-
-            const result = await tipsCollection.find(query).toArray();
-            res.send(result);
+            if (limit) {
+                const result = await tipsCollection.find().limit(limit).toArray();
+                res.send(result)
+            }
+            else {
+                const result = await tipsCollection.find(query).toArray();
+                res.send(result);
+            }
         })
         app.get('/tips/:id', async (req, res) => {
             const id = req.params.id;
-            const filter = {_id: new ObjectId(id)}
+            const filter = { _id: new ObjectId(id) }
             const result = await tipsCollection.findOne(filter)
             res.send(result)
         })
@@ -58,27 +65,27 @@ async function run() {
         app.put('/tips/:id', async (req, res) => {
             const id = req.params.id;
             const updatedTips = req.body;
-            const filter = {_id: new ObjectId(id)}
+            const filter = { _id: new ObjectId(id) }
             const updateDoc = {
                 $set: updatedTips
             }
             const result = await tipsCollection.updateOne(filter, updateDoc)
             res.send(result)
         })
-        app.patch('/tips/:id', async ( req, res) => {
+        app.patch('/tips/:id', async (req, res) => {
             const id = req.params.id;
-            const {email} = req.body;
-            const filter = {_id: new ObjectId(id)}
+            const { email } = req.body;
+            const filter = { _id: new ObjectId(id) }
             const updateDoc = {
-                $inc: {totalLikes: 1},
-                $addToSet: {likedBy: email }
+                $inc: { totalLikes: 1 },
+                $addToSet: { likedBy: email }
             }
             const result = await tipsCollection.updateOne(filter, updateDoc)
             res.send(result)
         })
         app.delete('/tips/:id', async (req, res) => {
             const id = req.params.id;
-            const filter = {_id: new ObjectId(id)}
+            const filter = { _id: new ObjectId(id) }
             const result = await tipsCollection.deleteOne(filter)
             res.send(result)
         })
@@ -90,12 +97,21 @@ async function run() {
             res.send(result)
         })
         app.get('/gardeners', async (req, res) => {
-            const result = await gardenersCollection.find().toArray();
-            res.send(result)
+            const limit = parseInt(req.query.limit);
+
+            if (limit) {
+                const result = await gardenersCollection.find({ status: "Active" }).limit(limit).toArray();
+                res.send(result)
+            }
+            else {
+                const result = await gardenersCollection.find().toArray();
+                res.send(result)
+            }
+
         })
 
         // Api for slider
-        app.get('/slider', async ( req, res) => {
+        app.get('/slider', async (req, res) => {
             const result = await slidersCollection.find().toArray();
             res.send(result);
         })
